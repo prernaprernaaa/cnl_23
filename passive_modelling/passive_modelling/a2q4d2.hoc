@@ -1,0 +1,128 @@
+load_file("nrngui.hoc") 
+
+create soma, dend
+access soma
+
+stamp=0.1 // nA
+rm=35000	// ohm cm2
+ra=250	// ohm cm
+CM=1.5	//muF cm2
+v_init = -70
+d = 2.5
+l = 1250
+
+soma{
+	diam=80
+	L=70
+	Ra=ra
+	cm= CM
+	nseg=int((L/(0.1*lambda_f(100))+0.9)/2)*2+1
+	print "Soma nseg=", nseg
+
+	insert pas
+	e_pas=-70
+	g_pas=1/rm
+}
+
+dend{
+
+	insert minmax
+
+	diam=d
+	L=l
+	Ra=ra
+	cm= CM
+	nseg=int((L/(0.1*lambda_f(100))+0.9)/2)*2+1
+	print "Dend nseg=", nseg
+
+	insert pas
+	e_pas=-70
+	g_pas=1/rm
+}
+
+
+
+connect dend(0), soma(1)
+
+insert minmax
+
+Vhold= 50
+objref vc
+
+vc=new SEClamp(0.5)
+vc.dur1=2
+vc.amp1=v_init
+vc.dur2=10
+vc.amp2=Vhold
+vc.dur3=8
+vc.amp3=v_init
+
+tstop = 1000
+
+proc update_clamp() {
+	vc.amp2=Vhold
+}
+
+
+
+proc update_L() {
+	init()
+	dend {
+		L=l
+		nseg=int((L/(0.1*lambda_f(100))+0.9)/2)*2+1
+		print nseg
+	}
+}
+
+proc update_diam() {
+	init()
+	dend {
+		diam=d
+		nseg=int((L/(0.1*lambda_f(100))+0.9)/2)*2+1
+		print nseg
+	}
+}
+
+proc maxv(){
+	finitialize()
+
+	while (t<tstop){
+		fadvance()
+	}
+	dend {
+		for (x) {
+			print x*dend.L, "length ", L,  "d", diam , "\t",vmax_minmax(x)
+		}
+	}
+
+}
+
+for (l = 1250; l <=1550; l += 100){
+
+	finitialize()
+
+	while (t<tstop){
+		fadvance()
+	}
+
+	update_L()
+	maxv()
+	
+}
+
+l = 1250
+update_L()
+
+for (d = 2.5; d <= 5.5; d += 1){
+
+	finitialize()
+
+	while (t<tstop){
+		fadvance()
+	}
+
+	update_diam()
+	maxv()
+	
+}
+

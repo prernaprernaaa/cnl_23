@@ -1,0 +1,79 @@
+load_file("nrngui.hoc") 
+
+create soma
+access soma
+
+// Parameters
+
+stamp= 6 // nA
+RM=35000
+CM= 1.5
+diam = 80 //mu m
+L = 70 //mu m
+v_init=-65
+
+
+insert pas
+e_pas = v_init
+g_pas=1/RM
+cm=CM
+
+
+objectvar stim
+soma stim = new IClamp(0.5)
+
+stim.del = 10
+stim.dur = 500
+stim.amp = stamp
+
+
+tstop = 600
+
+
+proc update_clamp() {
+	stim.amp=stamp
+}
+
+proc update_cm() {
+	cm=CM
+}
+
+proc update_rm() {
+	g_pas=1/RM
+}
+
+insert minmax
+
+for (CM = 1.5; CM<=11.5; CM += 1){
+
+	finitialize()
+
+	while (t<tstop){
+		fadvance()
+	}
+
+	update_cm()
+	print "Cm variations " , RM, cm,  abs(v_init-vmax_minmax(0.5)) , stim.amp , abs(v_init-vmax_minmax(0.5))/stim.amp
+}
+
+cm = 1.5
+
+
+for (RM = 35000; RM<=125000; RM += 10000){
+
+	finitialize()
+
+	while (t<tstop){
+		fadvance()
+	}
+
+	update_rm()
+	print "Rm variations  " , RM, g_pas,  cm,  abs(v_init-vmax_minmax(0.5)) , stim.amp , abs(v_init-vmax_minmax(0.5))/stim.amp
+}
+
+
+
+
+newPlotV()
+nrncontrolmenu()
+
