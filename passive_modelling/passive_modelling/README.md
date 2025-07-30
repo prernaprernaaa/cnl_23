@@ -1,1 +1,0 @@
-These codes were written for simulating neuronal dynamics in the simulator NEURON. The passive modelling folder is for passive neurons(no ion channels). These simulations were then further used for analysing effects of different biophysical properties on neuronal dynamics.
