@@ -1,0 +1,54 @@
+load_file("nrngui.hoc") 
+
+create soma
+access soma
+
+soma nseg = 1
+soma diam = 18.8
+soma L = 18.8
+soma Ra = 123.0
+
+soma insert hh
+stamp=0.05
+
+objectvar stim
+soma stim = new IClamp(0.5)
+
+stim.del = 100
+stim.dur = 1000
+stim.amp = stamp
+
+tstop = 1300
+
+objref apc
+soma apc=new APCount (0.5)
+apc.thresh=0
+
+// print apc.n for printing AP count.
+
+proc update_clamp() {
+	stim.amp=stamp
+}
+
+xpanel("Parameters")
+xvalue("Clamp Amplitude","stamp",1,"update_clamp()",1,1)
+xpanel()
+
+proc fvi(){
+
+	for (stamp = 0; stamp <= 0.6; stamp += 0.05){
+		fcurrent()
+		finitialize()
+		
+		while (t<tstop){
+		fadvance()
+		update_clamp()
+		}
+	
+		print stamp, celsius, "firing rate ", apc.n
+
+	}
+
+}
+newPlotV()
+nrncontrolmenu()
